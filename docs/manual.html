@@ -1,0 +1,980 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!-- SCCSID ("@(#)/export/home/staff/mike/src/language/eta/doc/SCCS/s.eta.html 1.6") -->
+<HTML>
+<HEAD>
+<TITLE>The ETA Programming Language</TITLE>
+<LINK REV="made" HREF="mailto:mike@tecc.co.uk">
+<META NAME="Author" CONTENT="Mike Taylor">
+<META NAME="Date" CONTENT="24th August 1999">
+<META NAME="Description" CONTENT="A description of and manual for the
+programming language ETA, which allows the small number of characters
+that are significant to the interpreter to be embedded in arbitrary
+text.">
+
+</HEAD>
+<BODY BGCOLOR=white>
+
+
+
+
+<H1>The ETA Programming Language</H1>
+<P>
+Designed by Mike Taylor, beginning Tuesday 24th August 1999<BR>
+Copyright &copy; Mike Taylor, 1999.
+<P>
+This document may be freely redistributed provided it is not modified
+in any way.  Specifically, the authorship must remain clear.  All
+feedback is extremely welcome, and should be emailed to the author at
+<A HREF="mailto:mike@tecc.co.uk"><TT>mike@tecc.co.uk</TT></A>.
+<P>
+This document describes version 1.0 of the ETA language.<BR>
+<SMALL>Document SCCSID ("@(#)/export/home/staff/mike/src/language/eta/doc/SCCS/s.eta.html 1.6")</SMALL>
+
+
+
+<H2><A NAME="1">1.  Table of Contents</A></H2>
+    <UL TYPE="disc">
+        <LI><A HREF="#1">1.  Table of Contents</A>
+        <LI><A HREF="#2">2.  Introduction</A>
+        <LI><A HREF="#3">3.  The Language</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#3.1">3.1.  Overview</A>
+            <LI><A HREF="#3.2">3.2.  Machine Model</A>
+            <LI><A HREF="#3.3">3.3.  Instruction Set Summary</A>
+            <LI><A HREF="#3.4">3.4.  Instruction Set Details</A>
+            <UL TYPE="disc">
+                <LI><A HREF="#3.4.1">3.4.1.  E: The dividE Instruction</A>
+                <LI><A HREF="#3.4.2">3.4.2.  T: The Transfer Instruction</A>
+                <LI><A HREF="#3.4.3">3.4.3.  A: The Address Instruction</A>
+                <LI><A HREF="#3.4.4">3.4.4.  O: The Output Instruction</A>
+                <LI><A HREF="#3.4.5">3.4.5.  I: The Input Instruction</A>
+                <LI><A HREF="#3.4.6">3.4.6.  N: The Number Instruction</A>
+                <LI><A HREF="#3.4.7">3.4.7.  S: The Subtract Instruction</A>
+                <LI><A HREF="#3.4.8">3.4.8.  H: The Halibut Instruction</A>
+            </UL>
+            <LI><A HREF="#3.5">3.5.  Comments</A>
+        </UL>
+        <LI><A HREF="#4">4.  Useful Idioms</A>
+        <LI><A HREF="#5">5.  Future Directions</A>
+        <LI><A HREF="#6">6.  Challenges</A>
+        <LI><A HREF="#7">7.  Examples</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#7.1">7.1.  Overview</A>
+            <LI><A HREF="#7.2">7.2.  Hello, World!</A>
+            <LI><A HREF="#7.3">7.3.  Copying Input to Output</A>
+            <LI><A HREF="#7.4">7.4.  Factorial (Recursive)</A>
+            <LI><A HREF="#7.5">7.5.  99 Bottles of Beer on the Wall</A>
+        </UL>
+        <LI><A HREF="#8">8.  Appendix: The Reference Interpreter</A>
+        </UL>
+
+
+
+<H2><A NAME="2">2.  Introduction</A></H2>
+<P>
+The design of the ETA programming language follows from the axiom that
+just because you have to program on a tiny machine, that doesn't mean
+your programs have to be unreadable.
+<P>
+The designers of less ambitious languages such as COBOL intended that
+programs written in their languages should be readable to
+English-speaking managers as well as trained technical staff.  ETA
+goes further by allowing you to write your programs in such a way that
+they can easily be read by speakers of whatever language you choose.
+<P>
+ETA achieves this lofty goal despite, or perhaps because of, its tiny
+size.  It has very few instructions, and is thus extremely easy to
+learn.  Admittedly, this extraordinary combination of power and
+simplicity comes at a cost: there is no guarantee that the natural
+language description in the program text will bear any relation to
+what the program actually does.
+<P>
+Why the name ETA?  There are several reasons.  Firstly, it's named
+after its own instruction set (see below).  Secondly it's named after
+the seventh letter of the Greek alphabet, both to celebrate its use of
+the base-7 numbering system, and because it comes a little way before
+iota, indicating how tiny the language is.  And thirdly, ETA stands
+for Estimated Time of Arrival, which is appropriate since ETA programs
+tend to run rather slowly.  Oh, and fourthly, ETA is an anagram of
+TEA, which is nice to drink.
+<P>
+Oh, and
+<A HREF="http://www.ocston.org/~harveyt">Harvey Thompson</A>
+(<A HREF="mailto:harveyt@sco.COM">harveyt@sco.COM</A>)
+suggests the following
+alternative interpretations of the ETA acronym:
+<P>
+<BLOCKQUOTE><PRE>
+Extremely Tortuous Algorithms
+Expressions That Amaze
+Encoded Tricky Allusions
+Esteemed Thrick Avuncularisations
+Elocutionist Throat Aberrations
+Effervescent Tautological Anagrams
+</PRE></BLOCKQUOTE>
+
+<H2><A NAME="3">3.  The Language</A></H2>
+
+
+<H3><A NAME="3.1">3.1.  Overview</A></H3>
+<P>
+The ETA language has only eight instructions, and these are named by
+the eight most frequently occurring letters in written English:
+<TT>E</TT>, <TT>T</TT>, <TT>A</TT>, <TT>O</TT>, <TT>I</TT>,
+<TT>N</TT>, <TT>S</TT> and <TT>H</TT>.  Since the same eight letters
+are used to represent numbers (see below), all other characters in an
+ETA program are ignored (with the exception of line-breaks - see
+below.)  This flexibility allows additional non-functional characters
+to be arbitrarily intermingled with the instruction and operand
+characters.
+<P>
+As a further aid to readability, case is not considered significant:
+programmers are encouraged to use mixed case in such a way as to
+elucidate the structure of the program.
+<P>
+For example, the following program fragments are all equivalent (they
+are no-ops):
+<P>
+<BLOCKQUOTE><PRE>
+NENAET
+nenaet
+NeNAEt
+Wunce upun a ET...
+Unbend a Pet, ugly!
+</PRE></BLOCKQUOTE>
+
+
+<H3><A NAME="3.2">3.2.  Machine Model</A></H3>
+<P>
+All the instructions work on a stack of signed 32-bit integers.
+Implementations must support stack-depth of at least 100.  More is
+better.  Infinite is best.
+<P>
+Two of the instructions use <I>addresses</I>.  An address in an ETA
+program is a line-number, counted from one upwards.  (This is why
+line-breaks are significant.)  Lines are considered to be terminated
+by an LF (ASCII 012), a CR (ASCII 015), a CR-LF pair or an LF-CR pair,
+so that ETA programs run portably on systems with different
+end-of-record conventions.
+
+
+<H3><A NAME="3.3">3.3.  Instruction Set Summary</A></H3>
+<P>
+The instructions are as mnemonic as possible (which in truth is not
+really all that mnemonic):
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TH ALIGN="left">Instruction
+	<TH ALIGN="left">Action
+</TR>
+<TR>
+	<TD><TT>E</TT>
+	<TD>divid<B>E</B> second-top by top; push quotient, then
+		remainder.
+</TR>
+<TR>
+	<TD><TT>T</TT>
+	<TD>if top-of-stack is true, <B>T</B>ransfer control to
+		stacked line.
+</TR>
+<TR>
+	<TD><TT>A</TT>
+	<TD>push one more than the current <B>A</B>ddress onto the
+		stack.
+</TR>
+<TR>
+	<TD><TT>O</TT>
+	<TD><B>O</B>utput a character whose code is popped from the
+		stack.
+</TR>
+<TR>
+	<TD><TT>I</TT>
+	<TD><B>I</B>nput a character and push its code on the stack.
+</TR>
+<TR>
+	<TD><TT>N</TT>
+	<TD>push a <B>N</B>umber onto the stack.
+</TR>
+<TR>
+	<TD><TT>S</TT>
+	<TD><B>S</B>ubtract the top of stack from the top-but-one.
+</TR>
+<TR>
+	<TD><TT>H</TT>
+	<TD><B>H</B>alibut: duplicate or move an element of the stack.
+</TR>
+</TABLE>
+<P>
+The individual instructions are described in more detail below.
+
+
+<H3><A NAME="3.4">3.4.  Instruction Set Details</A></H3>
+
+<H4><A NAME="3.4.1">3.4.1.  E: The dividE Instruction</A></H4>
+<P>
+Pops two numbers off the stack: first <I>b</I>, then <I>a</I>.
+Performs the integer division of <I>a</I> by <I>b</I>, and pushes
+first the quotient and then the remainder onto the stack.  For
+example, if first 19 and then 7 were pushed onto the stack, then the
+dividE instruction would push 2 (the quotient) and then 5 (the
+remainder).
+<P>
+(Sorry about the horrible mnemonic.)
+
+<H4><A NAME="3.4.2">3.4.2.  T: The Transfer Instruction</A></H4>
+<P>
+Pops two numbers off the stack: first <I>addr</I>, then <I>cond</I>.
+If <I>cond</I> is non-zero, then control is transferred to the first
+significant character on line number <I>addr</I> of the program.  As a
+special case, transferring to the address zero terminates the program.
+<P>
+This is the only conditional instruction in ETA: it is used to build
+loops and to call and return from subroutines.
+<P>
+(It can be hard to remember what order the parameters for this
+instruction go on the stack: the author finds it helpful to remember
+the word CAT: Condition, Address, Transfer!)
+
+<H4><A NAME="3.4.3">3.4.3.  A: The Address Instruction</A></H4>
+<P>
+Pushes one more than the current address onto the stack.  This is
+useful for allowing a Transfer to subroutine followed by a subsequent
+Transfer back to the point immediately after.  It can also be used to
+construct transfer addresses relative to the current address, yielding
+position-independent code.
+
+<H4><A NAME="3.4.4">3.4.4.  O: The Output Instruction</A></H4>
+<P>
+Pops the top number off the stack, and outputs the character whose
+ASCII code is that number.  (ASCII is specified so that it's possible
+to write ETA programs which will run portably on machines using
+different character sets.  This is obviously a pain to implement on
+non-ASCII machines.  But as one of our poets has written,
+<A HREF="dilbert.gif">``Here's a nickel, kid.  Get yourself a better
+computer.''</A>)
+
+<H4><A NAME="3.4.5">3.4.5.  I: The Input Instruction</A></H4>
+<P>
+Reads a single character and pushes its ASCII code onto the stack.
+(See the note on ASCII in the previous section.)  If the end of the
+input file has been reached, then -1 is pushed.
+
+<H4><A NAME="3.4.6">3.4.6.  N: The Number Instruction</A></H4>
+<P>
+This instruction pushes its argument on the stack.  It's unique in
+that it takes its argument from the program text - all the other
+instructions that need operands pop them from the stack.  The argument
+is made up of the sequence of significant characters following the
+<TT>N</TT>, up to but not including the first occurence of <TT>E</TT>.
+Those characters are treated as a big-endian sequence of base-seven
+digits with the following values:
+
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TH ALIGN="left">Digit
+	<TH ALIGN="left">=
+	<TH ALIGN="left">Value
+	<TH ALIGN="left">&nbsp;
+	<TH ALIGN="left">Digit
+	<TH ALIGN="left">=
+	<TH ALIGN="left">Value
+</TR>
+<TR>
+	<TD ALIGN="right"><TT>H</TT>
+	<TD>=
+	<TD>0
+	<TD>&nbsp;
+	<TD ALIGN="right"><TT>I</TT>
+	<TD>=
+	<TD>4
+</TR>
+<TR>
+	<TD ALIGN="right"><TT>T</TT>
+	<TD>=
+	<TD>1
+	<TD>&nbsp;
+	<TD ALIGN="right"><TT>N</TT>
+	<TD>=
+	<TD>5
+</TR>
+<TR>
+	<TD ALIGN="right"><TT>A</TT>
+	<TD>=
+	<TD>2
+	<TD>&nbsp;
+	<TD ALIGN="right"><TT>S</TT>
+	<TD>=
+	<TD>6
+</TR>
+<TR>
+	<TD ALIGN="right"><TT>O</TT>
+	<TD>=
+	<TD>3
+</TR>
+</TABLE>
+<P>
+So, for example, the sequence <TT>Ntone</TT> pushes the value 75
+(1x7^2 + 3x7^1 + 5x7^0).
+<P>
+Note that negative numbers can not be expressed in this way: they must
+be generated by a <B>S</B>ubtract instruction.
+<P>
+The characters making up the numeric argument are skipped; they are
+not also used as instructions, but execution continues from the first
+significant character after the terminating <TT>E</TT> character.
+<P>
+(The usual ETAOINSH order of the letters is perturbed for the mapping
+to digits so as to yield more <TT>E</TT>s - which are common in
+English text - and fewer <TT>H</TT>s.)
+
+<H4><A NAME="3.4.7">3.4.7.  S: The Subtract Instruction</A></H4>
+<P>
+Pops two numbers off the stack: first <I>b</I>, then <I>a</I>.
+Subtracts <I>b</I> from <I>a</I> and pushes the result onto the
+stack.
+
+<H4><A NAME="3.4.8">3.4.8.  H: The Halibut Instruction</A></H4>
+<P>
+Pops a number, <I>n</I>, off the stack, and modifies the remaining
+stack by rolling the <I>n</I>'th from the top to the top.  So when
+<I>n</I> is one, it swaps the top two elements; and when <I>n</I> is
+two, it rolls the top three elements.
+<P>
+If <I>n</I> is negative, its absolute value is used, but the specified
+element of the stack is copied to the top rather than moved.  So when
+<I>n</I> is -1, a stack <B>A B C</B> is transformed to <B>A B C B</B>.
+For the purposes of this instruction, zero is conveniently considered
+negative, so that <I>n</I>=0 performs a DUP rather than a no-op.
+(There are already 246 ways to do a no-op in ETA.)
+<P>
+I couldn't find a single synonym for ``roll'' that had an ``h'' in it
+anywhere, hence the horribly un-mnemonic mnemonic.  Sorry.
+
+
+<H3><A NAME="3.5">3.5.  Comments</A></H3>
+<P>
+There is no commenting convention as such in ETA: significant
+character are always significant, no matter what context.  The
+intention is that the whole of a well-written ETA program is a
+comment.
+<P>
+However, comments may be formed by using words made up entirely of
+letters other than the eight significant ones.  This is something of
+an art-form in itself.  Good words to use in ETA comments include
+<TT>crumbly</TT>, <TT>fulcrum</TT>, <TT>luxury</TT>, <TT>cruddy</TT>,
+<TT>buggy</TT>, <TT>fuzzy</TT>, <TT>guru</TT>, etc.
+<P>
+A related art is to allow significant characters to occur, but only in
+sequences which perform no-ops.  For example, <TT>NeS</TT> subtracts
+zero from the top of the stack (so be careful not to use it when the
+stack is empty); and <TT>NeN</TT><I>anything</I><TT>eT</TT> (where
+<I>anything</I> is a sequence of characters other than <TT>e</TT>)
+performs a conditional transfer, but the condition is false, so nothing
+happens.
+<P>
+(The author can't use his own first name - <TT>Mike</TT> - in an ETA
+program, since its significant sequence is <TT>ie</TT>, which reads a
+character and divides the top of stack by its value - so that if a NUL
+character is read, an illegal division by zero will ensue.)
+<P>
+Of course, significant characters may but used in program text with
+impunity provided that the afected portion of the program text is
+never executed.  For example, anything on a line following the
+sequence <TT>NteAT</TT> (transfer control to the next line) will never
+be executed.  This could be considered as a commenting convention; but
+use of this mechanism is considered poor form.
+
+
+
+<H2><A NAME="4">4.  Useful Idioms</A></H2>
+<P>
+Some idioms emerge repeatedly.  The first batch of these are so common
+and useful that they can almost be thought of as additional primitives
+(DUP, SWAP, ADD, JUMP, EXIT, SKIP, REM, DROP.)
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TD><TT>Ne H</TT>
+	<TD>Duplicate the top element of the stack.
+</TR>
+<TR>
+	<TD><TT>Nte H</TT>
+	<TD>Swap the top two elements of the stack.
+</TR>
+<TR>
+	<TD><TT>Ne N<I>number</I> S S</TT>
+	<TD>Add <I>number</I> to the top of the stack.
+</TR>
+<TR>
+	<TD><TT>Nte N<I>address</I> T</TT>
+	<TD>Unconditional jump to <I>address</I>.
+</TR>
+<TR>
+	<TD><TT>Nte Ne T</TT>
+	<TD>Successful completion (jump to address zero).
+</TR>
+<TR>
+	<TD><TT>A Ne Nte S S T<BR>
+		A&nbsp;Ne&nbsp;N<I>number</I>&nbsp;S&nbsp;S&nbsp;T</TT>
+		<!-- This is the longest sequence in the left-hand
+		column of the table, so if we force _it_ to be
+		unbreakable, the others should all be OK too. -->
+	<TD>If non-zero, skip the next line.<BR>
+	    ... or skip <I>number</I> lines.<BR>
+</TR>
+<TR>
+	<TD><TT>Nte A T</TT>
+	<TD>Disregard the rest of the current line.  (This works for
+	any sequence of non-<TT>E</TT> characters between the initial
+	<TT>N</TT> and <TT>e</TT> except for sequences in which the
+	only significant characters are <TT>h</TT>'s.)
+</TR>
+<TR>
+	<TD><TT>Ne Nte H T<BR>
+		S</TT>
+	<TD>Discard the top element of the stack.<BR>
+	    Special case: Discard top of stack, if known to be 0.
+</TR>
+</TABLE>
+<P>
+Function call and return can be done in a variety of ways, but the
+following conventions seem to work quite well:
+<P>
+<UL>
+<LI>
+The caller pushes the arguments, <I>then</I> the return address.  It
+then calls the function by pushing the <B>A</B>ddress of the next line
+and unconditionally <B>T</B>ransfering control.
+<LI>
+The called function will (almost) always need to roll the
+arguments above the return address.  For a typical
+two-argument function, this can be done with the prologue
+<TT>Nae H Nae H</TT>.
+<LI>
+(The callee does its work, removes the arguments from the
+stack, and replaces them with the return values, if any.)
+<LI>
+The callee needs to prepare for returning by pushing a true
+Transfer-condition, and rolling the return address to the top
+of the stack.  For a typical single-return-value function,
+this can be done with the epilogue:
+<TT>Nte Nae H T</TT>.
+</UL>
+<P>
+The thrust of these conventions, especially the first, is to make it
+easy for the caller.  (Where necessary, this done at the expense of
+the convenience of the callee, since a typical function will be called
+many times but defined only once.)
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TD><TT>A Nte N<I>address</I> T</TT>
+	<TD>Call the function at the specified <I>address</I>,
+		assuming that any necessary arguments have already
+		been pushed onto the stack.
+</TR>
+<TR>
+	<TD><TT>&nbsp;</TT>
+	<TD><I>No function-call prologue needed when there are no
+		arguments.</I>
+</TR>
+<TR>
+	<TD><TT>Nte H</TT>
+	<TD>Function-call prologue (1 argument).
+</TR>
+<TR>
+	<TD><TT>Nae H Nae H</TT>
+	<TD>Function-call prologue (2 arguments).
+</TR>
+<TR>
+	<TD><TT>Noe&nbsp;H&nbsp;Noe&nbsp;H&nbsp;Noe&nbsp;H</TT>
+		<!-- Longest sequence: see above -->
+	<TD>Function-call prologue (3 arguments).
+</TR>
+<TR>
+	<TD><TT>&nbsp;</TT>
+	<TD><I>etc.</I>
+</TR>
+<TR>
+	<TD><TT>Nte Nte H T</TT>
+	<TD>Function-call epilogue (no return-value).
+</TR>
+<TR>
+	<TD><TT>Nte Nae H T</TT>
+	<TD>Function-call epilogue (1 return-value).
+</TR>
+<TR>
+	<TD><TT>Nte Noe H T</TT>
+	<TD>Function-call epilogue (2 return-values).
+</TR>
+<TR>
+	<TD><TT>&nbsp;</TT>
+	<TD><I>etc.</I>
+</TR>
+</TABLE>
+<P>
+Functions that wish to use many arguments from the stack, or leave
+many values on the stack (e.g. functions dealing with NUL-terminated
+strings) will need to make their own arrangements.
+
+
+
+<H2><A NAME="5">5.  Future Directions</A></H2>
+<P>
+Unappealing though it seems, we may be forced to change the assignment
+of instructions to letters, so as to allow the most common English
+letters to occur most commonly in program text.  With the current
+encoding, the letter <TT>N</TT> (the Number instruction) tends to be
+most common, followed by <TT>H</TT> (the Halibut instruction),
+although both of these letters are towards the lower end of the
+frequency-in-prose spectrum; while conversely, the letter <TT>E</TT>
+(the dividE instruction) tends to occur least frequently.
+<P>
+This problem is at least partially addressed by the assignment of
+base-seven digits and the number terminator to letters, so
+re-assigning the instructions themselves may prove unnecessary.
+
+
+
+<H2><A NAME="6">6.  Challenges</A></H2>
+<P>
+ETA programmers might like to tackle the following challenges:
+<P>
+<UL>
+<LI>
+Write an ETA program containing no instructions at all - just
+comments, using only letters other than ETAOINSH.
+<LI>
+As above, but no-op ETAOINSH sequences are allowed.
+<LI>
+Write an ETA program in the form of a haiku (i.e. a poem of three
+lines, having five, seven and five syllables.)
+<LI>
+Write an ETA program in the form of a limerick.
+<LI>
+Write an ETA program whose text describes what it does ...
+<LI>
+... on a line-by-line basis.
+<LI>
+Write two functionally equivalent ETA programs whose text describes
+them in two different natural languages (e.g. English and French)
+<LI>
+Extend the previous exercise to several natural languages.
+<LI>
+Write an ETA program whose text is also valid in another programming
+language (e.g. C) ...
+<LI>
+... and which does the same thing in both languages.
+<LI>
+Extend the previous two exercises to several programming languages.
+</UL>
+<P>
+Best of Show: I guess the ultimate <I>tour de force</I> in ETA
+programming would probably be a suite of functionally equivalent
+programs structured as limericks in different languages, in which the
+meaning of the limericks describes the function performed by the
+code.
+<P>
+Since numeric constants may be broken across lines, extra style points
+can be earned by using the same code sequence both as a continuation
+of a numeric constant and (when <B>T</B>ransferred to) code.
+<P>
+Successful attempts at any of the challenges may be emailed to the
+author (address above) for attributed inclusion in future releases of
+the ETA distribution.
+
+
+
+<H2><A NAME="7">7.  Examples</A></H2>
+
+
+<H3><A NAME="7.1">7.1.  Overview</A></H3>
+<P>
+Due to the constraints of time, and the desire to construct real,
+working ETA programs as quickly as possible, the code below is not
+particularly good English.  The ``Hello, World!'' and <TT>pip</TT>
+programs are poetry rather than prose; the recursive factorial program
+is not padded at all, consisting only of the significant characters.
+<P>
+More elegant renditions of these programs would be very welcome;
+please email them to the author (address above).
+
+
+<H3><A NAME="7.2">7.2.  Hello, World!</A></H3>
+<P>
+This program prints everyone's favourite message.  The interleaving of
+the <B>N</B>umber and <B>O</B>utput instructions is obviously pretty
+arbitrary.  I've chosen to avoid the fenceposts: the selected
+interleaving is neither
+<I>n</I> &times; (<B>N</B>umber; <B>O</B>utput) 
+nor
+<I>n</I> &times; <B>N</B>umber; <I>n</I> &times; <B>O</B>utput.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+No heat: "hello.eta", written by Mike Taylor
+
+** FUNGICIDE **
+-- Fungus calendar --
+CURTSEY:
+	Fungal toe!  Fungal toe!  Fungal hoe!
+		(Burnt programmer nucleus)
+	Ooooooo!
+CRUDDY 2nd TOE:
+	Nine(!) fungal hyaena toe5!
+	Dungy alfalfa, penalty superlunary -- Oh, blubber!
+	Oo! Oooo! OW!
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+An alternative approach would be push a marker character on to the
+stack - NUL would be an obvious choice - followed by all the
+characters of the message, then to loop, <B>O</B>utputting each one
+(or to call a well-known function to do this):
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+NEN toe nine NA hyaena toe N &lt;aaa!&gt; Renault sudden Adolph Enid: ugly M$IE4.0
+Cygnus agenda: t'send a toe 2 nato.  Bend a ghoul entourage ant!  Venice T.
+NT, Be, Next -- a not-budget list of Operating Systems.
+Nurture 1 hundred hangmen, uterus 1st.
+s3ntient L1fe-f0rm?  J@bb@ $ Hut?!
+	-- On the Niet (Russian)
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+
+
+<H3><A NAME="7.3">7.3.  Copying Input to Output</A></H3>
+<P>
+This program, a re-implementation of the popular CP/M utility program
+<TT>pip</TT>, demonstrates the use of the <B>T</B>ransfer instruction
+for conditionals (line 4), looping (line 8) and termination (line 6).
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+-- Curriculum --
+1. Bruckner PhD (crud)
+2. Pungent Debussy
+   (Burgundy theft)
+3. Pungent Czech cult
+   (Nutmeg nugget)
+Ugly, bulky, buzzwordy blurb
+puncture 3rd juncture -- TRY!
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+An alternative, and more compact, rendering of the same program:
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+IN: (ehnen) Tess Nae TnEnTehtntenet
+ON: (-----) TE-- N-- T-E-T---------
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+(Not all the features of <TT>pip</TT> are implemented!)
+
+
+<H3><A NAME="7.4">7.4.  Factorial (Recursive)</A></H3>
+<P>
+The following unpadded program defines and recursively calls a
+factorial function which calculates the product of an integer with all
+the smaller positive integers: for example, 5 factorial is 120
+(5&times;4&times;3&times;2&times;1):
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+antenahet
+antennet
+anteniiet
+ntoeontenet
+nteh
+neh
+ntesanentesst
+ntentset
+neh
+ntes
+antennet
+antenshet
+ntenaeht
+i
+nehniies
+anentesst
+nentetnahet
+nenteh
+nsses
+nteh
+ntoeantenshet
+nenteh
+ss
+i
+nehniiesnoset
+nteniaet
+nehntoesnitet
+nteniaet
+nehnentessnanet
+nenteht
+ntenaeht
+nenaeh
+neh
+anentesst
+sntennnet
+ntoee
+nenssess
+nteh
+nteninet
+antenttaet
+ntenteht
+naehnaeh
+ne
+naeh
+naeh
+neh
+anentesst
+ntentthet
+ntes
+naeh
+nenenoesh
+ss
+naeh
+naeh
+ntensiet
+nteht
+ntenaeht
+nteh
+neh
+anentesst
+sntenteht
+o
+ntenttaet
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+Since this is a relatively large program, some annotation is in order:
+<P>
+<TABLE>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;1
+	<TD>&nbsp;<!-- to force the real columns apart -->
+	<TD>Call the subroutine at line 14 to read a number, in the
+	form of a sequence of decimal digits, from the standard
+	input.  That number is placed on the stack.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;2
+	<TD>&nbsp;<!-- to force the real columns apart -->
+	<TD>Call the factorial function itself at line 5, converting
+	the number on top of the stack into its own factorial.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;3
+	<TD>&nbsp;<!-- to force the real columns apart -->
+	<TD>Call the subroutine at line 32 to output the result as a
+	sequence of decimal digits
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;4
+	<TD>&nbsp;<!-- to force the real columns apart -->
+	<TD>Output a trailing newline character, and jump to line
+	zero, terminating execution.  This is the end of the main
+	program: the remainder of the code consists of the subroutines
+	called in these first four lines, and the subroutines that
+	they in turn call.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;5
+	<TD>&nbsp;<!-- to force the real columns apart -->
+	<TD>The factorial routine itself: the prologue at line 5 rolls
+	the argument <I>n</I> above the return address; line 11 makes
+	the recursive call with argument <I>n</I>-1 if the argument is
+	not 1; line 12 calls the routine at line 42 to multiply
+	<I>n</I> by <TT>fact(</TT><I>n</I><TT>-1)</TT>; and line 13 is
+	the epilogue, rollin the return address back above the result,
+	and transferring control to it.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;14
+	<TD>&nbsp;
+	<TD>The subroutine to read a decimal constant from the
+	standard input: lines 14-17 skip any leading sequence of space
+	characters; lines 18 initialises the accumulator; lines 19-24
+	deal with an incoming digit; lines 25-29 break on a space or
+	newline or at end of file, and otherwise loop; lines 30 and 31
+	discard the junk character on top of the stack and return the
+	accumulated value to the caller.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;32
+	<TD>&nbsp;
+	<TD>The subroutine to write a decimal constant to the standard
+	output: line 32 is the function-call prologue; lines 33-39
+	calculate and stack each digit in turn, least-significant
+	first; line 40 calls the output-a-string subroutine at line 58
+	to unstack the digits to standard output most-significant
+	first; line 41 is the function-return epilogue.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;42
+	<TD>&nbsp;
+	<TD>The subroutine to multiply two numbers together, which
+	works by the primitive method of adding the value of the
+	top-but-one value on the stack to an accumulator, initialised
+	to zero, the number of times indicated by the top value on
+	the stack.  Prologue on lines 42-45, main loop on lines 46-55,
+	and epilogue on line 56 and 57.
+</TR>
+<TR>
+	<TD ALIGN="right" VALIGN="top">line&nbsp;58
+	<TD>&nbsp;
+	<TD>The subroutine to write out stacked characters, down to
+	but not including a terminating NUL character.  The
+	function-return epilogue happens to be in the middle of the
+	code, on line 61 (why not?)
+</TR>
+</TABLE>
+<P>
+What could possibly be clearer?  Note how ETA facilitates top-down
+program design: this program begins by making high-level calls
+describing its algorithm in abstract terms, and then proceeds to
+elaborate on how those high-level calls are to be executed.
+
+
+<H3><A NAME="7.5">7.5.  99 Bottles of Beer on the Wall</A></H3>
+<P>
+The following program prints the words to the classic song <I>99
+Bottles of Beer on the Wall</I>:
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+*** NASTY ENID BLIETON! *** ("bottles.eta", written by Mike Taylor)
+	Nutmeg.  Why?  Burnt eats are improved by its characteristic odour
+	Nude.  Why?  Runty default suggests it's not such a HOT idea.
+vvvvvvvv	Brandenburg tess3r@ct [1-6] --
+Sun 3/80: turkey?  Dung-TECH CRT
+^^^^^^^^	&gt;&gt;&gt; O! &lt;&lt;&lt;
+		Nut grenade CRT
+		Drunken quake chum
+Uncle handymen: cutesy dust
+fungus sell-out (null turkey @ Dung-TECH turf)
+	-- puny, ugly, rubbery chum
+Brandenburg tesst 504 468
+ sbcdnfgtejklmnapqrieutwxyz	*b*d*fg**jklm**pq***u**xyz
+  nbcdtfgoejklme*pqr**uvwxyz	*bc**f*****lm***qr**uv*x**
+   nbcdefgnsjklmsepqrssuvwxyz	*bcd*fg**jk*m**pqr**uvw*yz
+	(@ Dung-TECH ...)
+@unt1e @untie T (Auntie?  And what's with all the Dung-TECH stuff?)
+	[Antena 4 ET]
+NT *ex -- Dung-TECH turf!
+Dung-TECH!!
+	[Anten@ 4 (tt) ET]
+&gt;&gt; nenaaaenahoenahoenahheniienahienatseniie &lt;&lt;	NT-eat: No optimisation
+&gt;&gt;&gt; naaoenahoenatoenaaienaaienatsenahheniie &lt;&lt;&lt;	NT-eat: No optimisation
+Ant grenade, truly.
+@unt1e Dung-TECH turf!!!
+Dung-TECH!!!!
+Ant grenad3 set (2 ugly!)
+&gt;&gt; nenatoenatoentssenaoheniienahoe &lt;&lt;	NT-eat: No optimisation
+&gt;&gt;&gt; nahsenaaieniienatnenatseniie &lt;&lt;&lt;	NT-eat: No optimisation
+Ant grenade: truly ugly &amp; cruddy.
+Nurture Dung-TECH turf!!!! (it needs watering &amp; occasional feeding)
+fungal chute,
+	NE [hanten] -&gt;	"concept"
+	NS [aeoni] -&gt;	"video"
+	NE [hanten] -&gt;	"asymmetry"
+	NT [*] -&gt;	"Romeo"
+	    &gt;&gt; nentoenahaenatnenaanenatse &lt;&lt;
+	   &gt;&gt;&gt; naaaentsseniienaaienatheniie &lt;&lt;&lt;
+	  &gt;&gt;&gt;&gt; naaoenaaoentssenaaheniiensae &lt;&lt;&lt;&lt;
+	 &gt;&gt;&gt;&gt;&gt; natnenaohenatsenahaeniienahoe &lt;&lt;&lt;&lt;&lt;
+	&gt;&gt;&gt;&gt;&gt;&gt; natnenatseniienahoenataentssentnhe &lt;&lt;&lt;&lt;&lt;&lt;
+Antena &lt;- ET,
+Runty Jules;
+Unruly Czech lantern concept
+	2nd toe; 2nd toe; Oo!
+	2nd belch =&gt; ninety
+		*** NEWT!! ***
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+The code needs no explanation.
+
+
+
+<H2><A NAME="8">8.  Appendix: The Reference Interpreter</A></H2>
+<P>
+There exists a
+<A HREF="eta.gz">reference interpreter</A>
+for the ETA language, called simply <TT>eta</TT>, against which all
+the example programs in this document, and more, have been tested.  It
+is implemented in
+<A HREF="http://www.perl.com/">Perl</A>
+for maximum portability.
+<P>
+The reference interpreter is invoked as follows:
+<P>
+<BLOCKQUOTE><PRE>
+eta [ -d <I>number</I> ] [ -O ] [ <I>eta-file</I> [ <I>eta-file2</I> ... ] ]
+</PRE></BLOCKQUOTE>
+<P>
+It executes the ETA program made by concatenating the <I>eta-file</I>s
+named on the command-line, reading the program from standard input if
+no files are named.  The ETA program runs with its standard input and
+output connected as the interpreters (which means that programs read
+from standard input can't do themselves do input.)
+<P>
+The options have the following effects:
+<P>
+<DL COMPACT>
+<DT>-d
+<DD>Print debugging output, at the specified level, to standard error.
+<DT>-O
+<DD>Interpret the program as OIL code (q.v.) instead of ETA code.
+</DL>
+<P>
+The debugging output is controlled by the value supplied to the
+<TT>-d</TT> option: it is composed of separate bitwise components,
+described in the following table, which may be ORred together:
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TH ALIGN="left">Component
+	<TH ALIGN="left">Output
+</TR>
+<TR>
+	<TD>1
+	<TD>Summary of compiled program's size.
+</TR>
+<TR>
+	<TD>2
+	<TD>``Done.'' message at end of run.
+</TR>
+<TR>
+	<TD>4
+	<TD>Execution trace: before each instruction is executed, a
+	line is emitted of the form
+ <TT><I>char</I>/<I>line</I>:&nbsp;<I>stack</I>&nbsp;&nbsp;<I>inst</I></TT>,
+	where <I>char</I> is the current program counter, measured in
+	significant characters; <I>line</I> is the current line;
+	<I>stack</I> is a space-separated list of the values on the
+	stack, with the most-recently-pushed to the right; and
+	<I>inst</I> is the instruction about to be executed.
+</TR>
+</TABLE>
+<P>
+Other ETA implementations exist, including an interpreter written in
+C, which is about thirty times as fast as the reference interpreter.
+However, whenever their behaviours differ in an area concerning which
+this document is ambiguous, the behaviour of the reference
+implementation is correct by definition.  Any such ambiguities should
+be emailed to the author (address above).
+
+
+&nbsp;
+<P>
+&nbsp;
+<P>
+&nbsp;
+<P>
+<SMALL>
+Source filename: eta.html<BR>
+Last update: Wed Sep 29 11:37:54 1999
+</SMALL>
+</BODY>
+</HTML>

@@ -1,0 +1,146 @@
+#!/usr/bin/perl -w
+
+# eas -- Eta ASsembler.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/src/SCCS/s.eas	1.1")
+#
+# EAS format (Eta ASsembler) is a simple way to drive the ETA virtual
+# machine while still knowing what you're doing.  The eight opcodes
+# and their arguments are represented in a simple, transparent form.
+#
+# We also provide comments (introduced by '#'), decimal constants,
+# character constants (introduced by a single quote), address
+# constants (referenced by '<' and defined by '>'), and file-inclusion
+# (introduced by '*')
+#
+# (We use the Getopt::Std package in preference to the officially
+# preferred Getopt::Long in part because that manual for the latter is
+# fifteen times as long as that for the former.  Remember the One-Page
+# Principle!)
+#
+# Still to be done:
+#	Maybe add macros (pseudo-instructions) for common idioms?
+#	Better still, a define-and-use-macros facility.
+
+use strict;
+use integer;
+use FileHandle;
+use Getopt::Std;
+
+sub gather_prog(*);
+sub get_word(\$);
+sub render_num($);
+
+
+my @iset = ('E', 'T', 'A', 'O', 'I', 'N', 'S', 'H');
+my %opts;
+getopts("dO", \%opts);
+#print("%opts: ", join(" ", map { "$_=$opts{$_}" } keys %opts), "\n");
+@iset = ('O', 'I', 'L', 'o', 'i', 'l', '0', '1') if $opts{"O"};
+my @digits = @iset; ($digits[0], $digits[7]) = ($digits[7], $digits[0]);
+if (!$opts{"O"}) {
+    foreach my $x (@digits) { $x = lc($x) }
+}
+
+my @lines;
+my %labels;
+my $fh = *ARGV;
+gather_prog(*ARGV);
+
+# assemble
+my $address = 0;
+LINE: while ($address < @lines) {
+    my $line = $lines[$address];
+    while (my $word = get_word($line)) {
+	for ($word) {
+	    if (/^E$/i || /^dividE$/i) {
+		print($iset[0]);
+	    } elsif (/^T$/i || /^Transfer$/i) {
+		print($iset[1]);
+	    } elsif (/^A$/i || /^Address$/i) {
+		print($iset[2]);
+	    } elsif (/^O$/i || /^Output$/i) {
+		print($iset[3]);
+	    } elsif (/^I$/i || /^Input$/i) {
+		print($iset[4]);
+	    } elsif (/^N/i) {
+		my $arg = "BLIBBER";
+#print STDERR "Number: '$_'\n";
+		my $c = substr($_, 1, 1);
+#print STDERR "\$c = '$c'\n";
+		if (defined($c)) {
+		    if (($c ge "0" && $c le "9") || $c eq "<" || $c eq "'") {
+			$arg = substr($_, 1);
+		    } else {
+			$arg = get_word($line);
+		    }
+		}
+#print STDERR "\$arg = '$arg'\n";
+		if ($arg =~ "^'") {
+		    $arg = ord(substr($arg, 1));
+		} elsif ($arg =~ /^</) {
+		    my $l = substr($arg, 1);
+		    $arg = $labels{$l};
+		    defined $arg or die "Number of undefined label '$l'";
+		}
+		print($iset[5]);
+		render_num($arg);
+	    } elsif (/^S$/i || /^Subtract$/i) {
+		print($iset[6]);
+	    } elsif (/^H$/i || /^Halibut$/i) {
+		print($iset[7]);
+	    } else {
+		print STDERR "$ARGV:$.: unrecognised instruction '$_'\n";
+		# ... but continue anyway ...
+	    }
+	}
+	print(" ");
+    }
+    print("\n");
+    $address++;
+}
+
+
+sub gather_prog(*) {
+    my $fh = shift();
+
+    while (<$fh>) {
+	s/#.*//;
+	s/[ \t]*$//;
+	while (s/^>([^:]*):[ \t]*//) {
+	    die "duplicate label '$1'" if $1 && exists $labels{$1};
+	    $labels{$1} = @lines+1;
+	    print STDERR "set label '$1' to ", $labels{$1}, "\n" if $opts{'d'};
+	}
+	if (/^\*/) {
+	    chomp(my $fn = substr($_, 1));
+	    my $nfh = new FileHandle("<$fn") or die "can't open '$fn': $!";
+	    gather_prog($nfh);
+	    $nfh->close();
+	} else {
+	    push(@lines, $_) if !/^$/;
+	}
+    }
+}
+
+
+sub get_word(\$) {
+    my $ref = shift();
+    my $text = $$ref;
+    $text =~ m/\s*(\S*)\s*(.*)/;
+    $$ref = $2;
+    return $1;
+}
+
+
+sub render_num($) {
+    my $arg = shift();
+    my @stack;
+
+    while ($arg != 0) {
+	push(@stack, $arg % 7);
+	$arg /= 7;
+    }
+
+    print(map { $digits[$_] } reverse(@stack));
+    print($digits[7]);
+}

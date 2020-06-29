@@ -1,0 +1,3 @@
+: #!/bin/sh
+# Trivial wrapper to run the real EASY with appropriate PATH.
+PATH=$PATH:../src exec ../src/$0 ${@+"$@"}

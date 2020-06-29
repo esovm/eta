@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!-- SCCSID("@(#)/export/home/staff/mike/src/language/eta/doc/SCCS/s.rawindex.html	1.2") -->
+<HTML>
+<HEAD>
+<!-- LINK REL="stylesheet" HREF="eta.css" type="text/css"> -->
+<TITLE>The ETA Project</TITLE>
+<LINK REV="made" HREF="mailto:mike@tecc.co.uk">
+<META NAME="Author" CONTENT="Mike Taylor">
+<META NAME="Date" CONTENT="28th September 1999">
+<META NAME="Description" CONTENT="The home page for the programming
+language ETA, which allows the small number of characters that are
+significant to the interpreter to be embedded in arbitrary text.">
+
+</HEAD>
+<BODY BGCOLOR="white">
+
+
+
+<H1>The ETA Project</H1>
+<P>
+Designed by Mike Taylor, beginning Tuesday 24th August 1999<BR>
+Copyright &copy; Mike Taylor, 1999.
+<P>
+This document may be freely redistributed provided it is not modified
+in any way.  Specifically, the authorship must remain clear.  All
+feedback is extremely welcome, and should be emailed to the author at
+<A HREF="mailto:mike@tecc.co.uk"><TT>mike@tecc.co.uk</TT></A>.
+
+
+<H2><A NAME="1">1.  Table of Contents</A></H2>
+    <UL TYPE="disc">
+        <LI><A HREF="#1">1.  Table of Contents</A>
+        <LI><A HREF="#2">2.  Introduction</A>
+        <LI><A HREF="#3">3.  Sample Code</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#3.1">3.1.  Overview</A>
+            <LI><A HREF="#3.2">3.2.  Sample ETA Programs</A>
+            <LI><A HREF="#3.3">3.3.  Sample EAS Programs</A>
+        </UL>
+        <LI><A HREF="#4">4.  Documentation</A>
+        <LI><A HREF="#5">5.  Interpreters and Other Software</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#5.1">5.1.  The Reference ETA Interpreter</A>
+            <LI><A HREF="#5.2">5.2.  The Unofficial-But-Fast ETA Interpreter</A>
+            <LI><A HREF="#5.3">5.3.  EAS, The ETA Assembler</A>
+            <LI><A HREF="#5.4">5.4.  EASy, The EAS Interpreter</A>
+            <LI><A HREF="#5.5">5.5.  ETAword</A>
+            <LI><A HREF="#5.6">5.6.  ETAinst</A>
+        </UL>
+        <LI><A HREF="#6">6.  Download Everything</A>
+        </UL>
+
+
+<H2><A NAME="2">2.  Introduction</A></H2>
+<P>
+This is the home page of ETA, the programming language that not only
+resembles natural language, but can resemble whatever specific natural
+language you want (with the exception of those that require non-Latin
+characters: apologies to Chinese and Japanese programmers.)
+<P>
+ETA is the language in which:
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+No heat: "hello.eta", written by Mike Taylor
+
+** FUNGICIDE **
+-- Fungus calendar --
+CURTSEY:
+	Fungal toe!  Fungal toe!  Fungal hoe!
+		-- (Burnt programmer nucleus)
+	Ooooooo!
+CRUDDY 2nd TOE:
+	Nine(!) fungal hyaena toe5!
+	Dungy alfalfa, penalty superlunary -- Oh, blubber!
+	Ooooooo!
+</PRE></SMALL></BLOCKQUOTE>
+<P>
+... prints the classic message, ``Hello, world!''.
+<P>
+Here you will find everything you need to start programming in ETA: a
+comprehensive specification for ETA, and for its assembler, EAS;
+sample ETA and EAS programs; and interpreters that will enable you to
+run ETA programs and compile EAS programs into ETA.
+<P>
+In time, I hope an ETA user-community will grow up, contributing to
+the ETA standard library (see below), and writing programs of
+terrifying elegance and beauty to meet the challenges described in the
+ETA manual.  In the meantime, all feedback should be emailed to the
+author (address above).
+
+
+
+<H2><A NAME="3">3.  Sample Code</A></H2>
+
+
+<H3><A NAME="3.1">3.1.  Overview</A></H3>
+Yes, it would make more sense to describe the ETA language before
+ploughing in with the code samples; but the shock value would be
+decreased that way, so here's some code already.  (The ETA and EAS
+manuals are described in
+<!-- ### check that this reference remains correct -->
+<A HREF="#4">the next section</A>,
+if you absolutely insist on reading things in a logical order.
+
+
+<H3><A NAME="3.2">3.2.  Sample ETA Programs</A></H3>
+<P>
+The following sample programs are available:
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TD><A HREF="../pit/hello.eta"><TT>hello.eta</TT></A></TD>
+	<TD>The classic ``Hello, world!'' program.
+</TR>
+<TR>
+	<TD><A HREF="../pit/hello2.eta"><TT>hello2.eta</TT></A></TD>
+	<TD>An alternative implementation of ``Hello, world!''.
+</TR>
+<TR>
+	<TD><A HREF="../pit/pip.eta"><TT>pip.eta</TT></A></TD>
+	<TD>Copy standard input to standard output.
+</TR>
+<TR>
+	<TD><A HREF="../pit/pip2.eta"><TT>pip2.eta</TT></A></TD>
+	<TD>A smaller copy-input-to-output program.
+</TR>
+<TR>
+	<TD><A HREF="../pit/fact.eta"><TT>fact.eta</TT></A></TD>
+	<TD>Print the recursively-calculated factorial of the number
+	on the standard input stream.
+</TR>
+<TR>
+	<TD><A HREF="../pit/bottles.eta"><TT>bottles.eta</TT></A></TD>
+	<TD>Print the lyrics to ``99 Bottles of Beer on the Wall''.
+</TR>
+<TR>
+	<TD><A HREF="../pit/crlf.eta"><TT>crlf.eta</TT></A></TD>
+	<TD>Test whether the interpreter handles CR/LF sequences
+	correctly.
+</TR>
+</TABLE>
+
+
+<H3><A NAME="3.3">3.3.  Sample EAS Programs</A></H3>
+<P>
+The following sample code is available:
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TD COLSPAN="2"><B>Standard Library Functions</B>
+	<!-- ### check that this reference remains correct -->
+	(see <A HREF="easman.html#5">the EAS manual, chapter 5: The
+	Standard Library</A>)</TD>
+</TR>
+<TR>
+	<TD><A HREF="../easpit/multiply.eas"><TT>multiply.eas</TT></A></TD>
+	<TD>Function to multiply two numbers together by repeatedly
+	adding one of them to an initially-zero accumulator.  (Is
+	there a more efficient algorithm?)
+</TR>
+<TR>
+	<TD><A HREF="../easpit/writestr.eas"><TT>writestr.eas</TT></A></TD>
+	<TD>Variadic function to print a NUL-terminated string.
+</TR>
+<TR>
+	<TD><A HREF="../easpit/writenum.eas"><TT>writenum.eas</TT></A></TD>
+	<TD>Function to print its single argument as a decimal integer.
+</TR>
+<TR>
+	<TD><A HREF="../easpit/readnum.eas"><TT>readnum.eas</TT></A></TD>
+	<TD>The converse of <TT>printnum.eas</TT>: Function yielding
+	the value of a decimal integer written to standard output.
+</TR>
+
+<TR>
+	<TD COLSPAN="2"><BR><B>Miscellaneous</B></TD>
+</TR>
+<TR>
+	<TD><A HREF="../easpit/true.eas"><TT>true.eas</TT></A></TD>
+	<TD>A reimplementation of the Unix utility <TT>/bin/true</TT>
+</TR>
+<TR>
+	<TD><A HREF="../easpit/hello.eas"><TT>hello.eas</TT></A></TD>
+	<TD>The classic ``Hello, world!'' program.
+</TR>
+<TR>
+	<TD><A HREF="../easpit/hello2.eas"><TT>hello2.eas</TT></A></TD>
+	<TD>An alternative implementation of the ``Hello, world!''
+	program using the standard library WRITESTR function (see
+	above).
+</TR>
+<TR>
+	<TD><A HREF="../easpit/pip.eas"><TT>pip.eas</TT></A></TD>
+	<TD>Copy standard input to standard output.
+</TR>
+<TR>
+	<TD><A HREF="../easpit/pip2.eas"><TT>pip2.eas</TT></A></TD>
+	<TD>Compressed version of <TT>pip.eas</TT>, all on two lines.
+</TR>
+<TR>
+	<TD><A HREF="../easpit/reverse.eas"><TT>reverse.eas</TT></A></TD>
+	<TD>Copy input to output, reversed byte-for-byte.  (This is
+	done by stacking up all the bytes of the input file, so some
+	implementations will fail for large files.)
+</TR>
+<TR>
+	<TD><A HREF="../easpit/fact.eas"><TT>fact.eas</TT></A></TD>
+	<TD>Program to calculate factorials by defining and
+	(recursively) calling a function, FACT; also uses the standard
+	READNUM, WRITENUM, MULTIPLY and WRITESTR functions.
+</TR>
+<TR>
+	<TD><A HREF="../easpit/bottles.eas"><TT>bottles.eas</TT></A></TD>
+	<TD>Print the lyrics to ``99 Bottles of Beer on the Wall'',
+	using the standard WRITENUM and WRITESTR functions.
+</TR>
+<!-- ### add "euclid.eas" when finished -->
+</TABLE>
+
+
+
+<H2><A NAME="4">4.  Documentation</A></H2>
+<P>
+There are two significant documents:
+<A HREF="manual.html">the ETA manual</A>
+describes the ETA language itself, including extensive tutorial
+examples drawn from the pool of sample code above.
+In addition,
+<A HREF="easman.html">the EAS manual</A>
+describes EAS, the ETA assembler, which may be used to circumvent some
+of the more onerous aspects of ETA programming - though the true
+purist will shun it.  Again, example code is included, primarily from
+the pool above.
+<P>
+The documents should be read in the specified order: ETA first, then
+EAS.
+
+
+
+<H2><A NAME="5">5.  Interpreters and Other Software</A></H2>
+
+
+<H3><A NAME="5.1">5.1.  The Reference ETA Interpreter</A></H3>
+<P>
+The Reference ETA Interpreter is a
+<A HREF="http://www.perl.com/">Perl</A>
+script, available in two forms:
+<A HREF="../src/eta">the master version</A>
+and
+<A HREF="../src/smalleta">the compressed/obfuscated version</A>.
+(Improvements to the compression/obfuscation of the latter are
+welcomed.)
+<P>
+By definition, the behaviour of the reference implementation is always
+correct.  Whenever its behaviour differs from that if another
+interpreter in a area concerning which the ETA manual is ambiguous,
+the behaviour of the reference implementation should be emulated.
+(Any such ambiguities should be emailed to the author at the address
+above).
+
+
+<H3><A NAME="5.2">5.2.  The Unofficial-But-Fast ETA Interpreter</A></H3>
+<P>
+<A HREF="http://www.ocston.org/~harveyt">Harvey Thompson</A>
+(<A HREF="mailto:harveyt@sco.COM">harveyt@sco.COM</A>)
+has written an
+<A HREF="../harv/eta.c">unofficial ETA interpeter in C</A>,
+which runs about thirty times as fast as the reference implementation.
+
+
+<H3><A NAME="5.3">5.3.  EAS, The ETA Assembler</A></H3>
+<P>
+<A HREF="../src/eas">EAS, the ETA assembler</A> is another
+<A HREF="http://www.perl.com/">Perl</A> script.
+<P>
+(By the way, I've only been writing Perl for two and a bit months, so
+I freely admit that the Perl code in both the ETA interpreter and the
+EAS assembler is probably pretty non-idiomatic.  I bet you can guess
+I've been writing C for a decade, right?  By all means point out my
+code's unecessary C-o-centricisms to me - I'm keen to improve my
+Perl.)
+
+
+<H3><A NAME="5.4">5.4.  EASy, The EAS Interpreter</A></H3>
+<P>
+<A HREF="../src/easy">EAS, the ETA interpreter</A>
+is a trival shell-script that invokes <TT>eas</TT> on a named EAS
+file, then invokes <TT>eta</TT> on the result.  As a by-product, the
+assembled ETA file is left next to the EAS source.
+
+
+<H3><A NAME="5.5">5.5.  ETAword</A></H3>
+<P>
+<A HREF="../src/etaword">ETAword</A>
+is a trivial hack to find words from the system dictionary that can be
+incorporated into an ETA program containing a known sequence of
+significant characters.
+
+
+<H3><A NAME="5.6">5.6.  ETAinst</A></H3>
+<P>
+<A HREF="../src/etainst">ETAinst</A>
+is a truly trivial hack to find the significant characters in
+candidate words for an ETA program. This will tell you (for example)
+what your name does, so that you can interpolate it in an ETA program.
+
+
+
+<H2><A NAME="6">6.  Download Everything</A></H2>
+<P>
+If you like what you see here, you may find wish to
+<A HREF="../eta.99-09-29.tar.gz">download an entire ETA distribution</A>:
+a copy of this page, the sample programs, the manuals, both versions
+of the reference interpreter, the unofficial interpreter, the
+assembler, the support utilities, etc.
+
+&nbsp;
+<P>
+&nbsp;
+<P>
+&nbsp;
+<P>
+<SMALL>
+Source filename: rawindex.html<BR>
+Last update: Wed Sep 29 15:15:41 1999
+</SMALL>
+</BODY>
+<HTML>

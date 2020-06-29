@@ -1,0 +1,12 @@
+What's what in here?
+
+eta	Interpreter for ETA program.
+eas	The Eta ASsembler, which compiles EAS code into "real" ETA.
+easy	Wrapper for eas and eta: compile and run an EAS program.
+etaword	Tool to find whole words incorporating significant sequences.
+etainst	Tool to find significant sequences within words/phrases.
+
+Also, "pip.eta" and "hello.eta" -- the first two cosmetically complete
+ETA programs ever written -- live here for now.  They really belong in
+"../pit" but that would be too dangerous -- "make clean" or even a
+"easy {pip,hello}" would destroy them.

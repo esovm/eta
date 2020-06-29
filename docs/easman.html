@@ -1,0 +1,1014 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!-- SCCSID("@(#)/export/home/staff/mike/src/language/eta/doc/SCCS/s.eas.html	1.5") -->
+<HTML>
+<HEAD>
+<TITLE>EAS - The ETA Assembler</TITLE>
+<LINK REV="made" HREF="mailto:mike@tecc.co.uk">
+<META NAME="Author" CONTENT="Mike Taylor">
+<META NAME="Date" CONTENT="7th September 1999">
+<META NAME="Description" CONTENT="A description of and manual for EAS,
+the assembler for the ETA programming language (q.v.), which provides
+slightly higher-level programming support.">
+
+</HEAD>
+<BODY BGCOLOR=white>
+
+
+
+
+<H1>EAS - The ETA Assembler</H1>
+<P>
+Designed by Mike Taylor, beginning Tuesday 7th September 1999<BR>
+Copyright &copy; Mike Taylor, 1999.
+<P>
+This document may be freely redistributed provided it is not modified
+in any way.  Specifically, the authorship must remain clear.  All
+feedback is extremely welcome, and should be emailed to the author at
+<A HREF="mailto:mike@tecc.co.uk"><TT>mike@tecc.co.uk</TT></A>.
+<P>
+This document describes version 1.0 of EAS.<BR>
+<SMALL>Document SCCSID("@(#)/export/home/staff/mike/src/language/eta/doc/SCCS/s.eas.html	1.5")</SMALL>
+
+
+
+<H2><A NAME="1">1.  Table of Contents</A></H2>
+    <UL TYPE="disc">
+        <LI><A HREF="#1">1.  Table of Contents</A>
+        <LI><A HREF="#2">2.  Introduction</A>
+        <LI><A HREF="#3">3.  Syntax</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#3.1">3.1.  Overview</A>
+            <LI><A HREF="#3.2">3.2.  Comments</A>
+            <LI><A HREF="#3.3">3.3.  Instructions</A>
+            <LI><A HREF="#3.4">3.4.  Numeric Constants</A>
+            <LI><A HREF="#3.5">3.5.  Labels</A>
+            <LI><A HREF="#3.6">3.6.  File Inclusion</A>
+        </UL>
+        <LI><A HREF="#4">4.  Invocation</A>
+        <LI><A HREF="#5">5.  The Standard Library</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#5.1">5.1.  Overview</A>
+            <LI><A HREF="#5.2">5.2.  Conventions</A>
+            <UL TYPE="disc">
+                <LI><A HREF="#5.2.1">5.2.1.  File and Label Names</A>
+                <LI><A HREF="#5.2.2">5.2.2.  Nested Inclusion</A>
+                <LI><A HREF="#5.2.3">5.2.3.  Comments</A>
+            </UL>
+            <LI><A HREF="#5.3">5.3.  Routines</A>
+        </UL>
+        <LI><A HREF="#6">6.  Development/Debugging Hints</A>
+        <LI><A HREF="#7">7.  Future Directions</A>
+        <LI><A HREF="#8">8.  Tutorial Examples</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#8.1">8.1.  Introduction</A>
+            <LI><A HREF="#8.2">8.2.  true</A>
+            <LI><A HREF="#8.3">8.3.  Hello, World!</A>
+            <LI><A HREF="#8.4">8.4.  Copying Input to Output</A>
+            <LI><A HREF="#8.5">8.5.  Function Definition</A>
+            <LI><A HREF="#8.6">8.6.  Function Call</A>
+            <LI><A HREF="#8.7">8.7.  Writing a String (Variadic Function)</A>
+            <LI><A HREF="#8.8">8.8.  A Better Implementation of Hello, World!</A>
+            <LI><A HREF="#8.9">8.9.  Writing a Number (yes, I know it's pathetic)</A>
+            <LI><A HREF="#8.10">8.10.  Multiplication</A>
+            <LI><A HREF="#8.11">8.11.  Reading a Number</A>
+            <LI><A HREF="#8.12">8.12.  Factorial (Recursive)</A>
+            <LI><A HREF="#8.13">8.13.  99 Bottles of Beer on the Wall</A>
+        </UL>
+        <LI><A HREF="#9">9.  Appendix: Additional ETA-Programming Tools</A>
+        <UL TYPE="disc">
+            <LI><A HREF="#9.1">9.1.  EASy</A>
+            <LI><A HREF="#9.2">9.2.  ETAword</A>
+            <LI><A HREF="#9.3">9.3.  ETAinst</A>
+            <LI><A HREF="#9.4">9.4.  [Your Utility Here]</A>
+            </UL>
+        </UL>
+
+
+
+<H2><A NAME="2">2.  Introduction</A></H2>
+<P>
+Although <A HREF="eta.html">ETA</A> is an elegant language, one or
+two of its features make it slightly difficult to write in: for
+example, the base-seven representation of numbers, using letters
+instead of digits; and the necessity to embed absolute line-number in
+the code as targets for the Transfer-execution instruction.
+<P>
+To ameliorate this problem, an ETA assembler, EAS, is provided: this
+reads a program in a simple syntax which includes line labels, decimal
+constants, character-value constants and file inclusion, and writes an
+equivalent pure-ETA program.
+<P>
+This document specifies the EAS syntax, gives some examples, and
+describes how to invoke the assembler.
+<P>
+Some familiarity with ETA is assumed.
+
+
+
+<H2><A NAME="3">3.  Syntax</A></H2>
+
+
+<H3><A NAME="3.1">3.1.  Overview</A></H3>
+<P>
+The relationship between the EAS source code and the ETA code is
+deliberately very close, since EAS has the same relationship to ETA
+that (say) a 6502 assembler has to 6502 machine code.  For example,
+each line of EAS (except blank lines and those which are blank after
+comment-stripping) yields a single, corresponding line of ETA.
+<P>
+It would be perfectly possible to write a compiler for a high-level
+language that produces ETA as its object code, but EAS isn't it.
+(Or here's a great idea: someone with a lot of time to kill could
+re-target GCC for the ETA virtual machine!)
+
+
+<H3><A NAME="3.2">3.2.  Comments</A></H3>
+<P>
+Comments are introduced by a hash character (<TT>#</TT>) and continue
+to the end of the line.
+
+
+<H3><A NAME="3.3">3.3.  Instructions</A></H3>
+<P>
+The ETA instruction <TT>E</TT>, <TT>T</TT>, <TT>A</TT>, <TT>O</TT>,
+<TT>I</TT>, <TT>N</TT>, <TT>S</TT> and <TT>H</TT> may be represented
+by themselves, or by the keywords <TT>dividE</TT>, <TT>Transfer</TT>,
+<TT>Address</TT>, <TT>Output</TT>, <TT>Input</TT>, <TT>Number</TT>
+<TT>and</TT> Subtract respectively.  The single-letter and whole-word
+forms may be freely intermixed.
+<P>
+All instructions are recognised case-insensitively, so (for example),
+<TT>divide</TT>, <TT>DIVIDE</TT>, <TT>Divide</TT>, <TT>dividE</TT> and
+<TT>DiViDe</TT> are all equivalent.
+<P>
+Many instructions may occur on a single line, but they must be
+separated by whitespace (i.e., a sequence of one or more SPACE and/or
+TAB characters.)
+
+
+<H3><A NAME="3.4">3.4.  Numeric Constants</A></H3>
+<P>
+The <TT>N</TT>, or <TT>Number</TT>, instruction is unique in that it
+alone takes an argument from the EAS program text.  The argument may
+follow immediately after the letter <TT>N</TT> if the single-letter
+form is used, but must be separated from the whole-word form by
+whitespace.
+<P>
+Numeric constants may be expressed in three ways:
+<P>
+<UL>
+<LI>As a sequence of decimal digits.
+<LI>As a character constant, introduced by a single quote.
+<LI>As a label value, introduced by a less-than sign (see below.)
+</UL>
+
+
+<H3><A NAME="3.5">3.5.  Labels</A></H3>
+<P>
+Labels are provided as an abstraction of addresses, so that portions
+of code can be relocated without needing to re-count lines.
+<P>
+A line may be labelled by prefixing it with the sequence
+<TT>&gt;<I>NAME</I>:</TT> (i.e. greater-than, label name, colon.)
+There is no limit to the length of labels; they may be contain any
+non-white characters other than the colon.
+<P>
+A label may not be defined more than once.
+<P>
+A line may carry multiple labels (e.g. <TT>&gt;FOO: &gt;BAR:
+<I>code</I></TT>).  This is useful primarily when defining functions:
+the first line of a function always needs a public name, used as the
+entry point; and sometimes also needs a private name, used only within
+the text of the function.
+<P>
+Labels may be used as the argument to the <TT>N</TT> instruction as in
+<TT>N&lt;<I>NAME</I></TT> (i.e. less-than, label name)
+<P>
+Labels may be used both before and after definition.
+
+
+<H3><A NAME="3.6">3.6.  File Inclusion</A></H3>
+<P>
+A line starting with a star (<TT>*</TT>) requests the inclusion at
+that point of the file whose name immediately follows the star.  No
+intervening whitespace should be used.  Compilation proceeds as though
+the starred line were replaced by the contents of the named file.
+<P>
+Included files may include other files, and so on <I>ad
+infinitum</I>.
+<P>
+Labels defined in an included file may be used in the including file,
+and <I>vice versa</I>.  The same label may not be defined in more than
+one file contributing to a single compilation.
+<P>
+The paths of included files are always interpreted relative to the
+working directory of the EAS process rather than (for example)
+relative to a well-known library directory, or relative the location
+of the file containing the inclusion request.  This may be a bug.  Ask
+me again next week.
+
+
+
+<H2><A NAME="4">4.  Invocation</A></H2>
+<!-- ### the ETA manual should also include an Invocation section -->
+<P>
+The ETA Assembler is invoked as follows:
+<P>
+<BLOCKQUOTE><PRE>
+eas [ -d ] [ -O ] [ <I>eas-file</I> [ <I>eas-file2</I> ... ] ]
+</PRE></BLOCKQUOTE>
+<P>
+It assembles the <I>eas-file</I>s named on the command-line,
+concatenating them into a single program if there are more than one,
+and reading the program from standard input if no files are named.  It
+writes the assembled ETA program to standard output; so it can be used
+as a filter.
+<P>
+The options have the following effects:
+<P>
+<DL COMPACT>
+<DT>-d
+<DD>Print debugging output to standard error.
+<DT>-O
+<DD>Emit OIL code (q.v.) instead of ETA code.
+</DL>
+<P>
+The debugging output contains details such as the line numbers
+assigned to each label; it is unlikely to be of interest to anyone
+except the maintainer of the assembler.
+
+
+
+<H2><A NAME="5">5.  The Standard Library</A></H2>
+
+
+<H3><A NAME="5.1">5.1.  Overview</A></H3>
+<P>
+Since most ETA programs need access to the same basic facilities such
+as multiplication, numeric input, etc., there is an obvious need for a
+standard library of EAS files which can provide these facilities.  The
+result is a set of EAS source files, distributed along with the
+assembler itself, which have well-known filenames (for inclusion), and
+define well-known function names (labels) for calling.  This section
+describes the standard EAS library.
+<P>
+It would be nice also to provide these routines in the form of
+compiled ETA code, ideally padded to make good prose or poetry.
+Unfortunately, compiled ETA code will in general be different each
+time it's used, since it will be Transferring to addresses in itself
+and in other standard routines which may be at different locations.
+We could ameliorate (but not solve) this problem by getting EAS to
+generate position-independent code by calculating Transfer addresses
+relative to the current address.  In the mean time, the standard
+library is provided in EAS form only.
+
+
+<H3><A NAME="5.2">5.2.  Conventions</A></H3>
+
+<H4><A NAME="5.2.1">5.2.1.  File and Label Names</A></H4>
+Standard library files must be named all in lower case, with names no
+more than eight letters long, and with a <TT>.eas</TT> extension.
+(This restriction is so that the filenames are unambiguous for use on
+an MS-DOS or ISO 9660 filesystem.)  For example,
+<TT>multiply.eas</TT>, <TT>writenum.eas</TT> and <TT>sum.eas</TT>
+would all be legitimate filenames for standard functions:
+<TT>Multiply.eas</TT>, <TT>writenumber.eas</TT> and
+<TT>sum_num.eas</TT> are not.
+<P>
+Functions defined in the standard library must be named exactly the
+same as the files that contain them except that they must be all in
+upper case (and of course omit the <TT>.eas</TT> extension.)  For
+example, a standard library file called <TT>multiply.eas</TT> must
+define function labelled <TT>MULTIPLY</TT>.
+<P>
+All the labels used within a function labelled <TT>FOO</TT>, say, must
+begin with <TT>FOO</TT>, followed by a lower-case letter or
+underscore, followed by any sequence of upper- and lower-case letters
+and underscores - there is no length limit.  For example, the
+<TT>MULTIPLY</TT> function might internally use the labels
+<TT>MULTIPLYloop</TT> and <TT>MULTIPLY_done</TT>.
+<P>
+These conventions mean that a standard library file called
+<TT>foo.eas</TT>, say, has complete control over the namespace of
+labels beginning with <TT>FOO</TT> and not followed by another capital
+letter; so no clash could arise from a pair of standard library files
+called <TT>foo.eas</TT> and <TT>food.eas</TT>, for example.
+
+<H4><A NAME="5.2.2">5.2.2.  Nested Inclusion</A></H4>
+When one library routine uses another, should it include it the file
+that defines it?  For example, the standard <TT>WRITENUM</TT> routine
+uses <TT>WRITESTR</TT>; does that mean that <TT>writenum.eas</TT>
+should include <TT>readnum.eas</TT> and save the top-level programmer
+the bother?
+<P>
+No, because in the case where a top-level program includes two or more
+complex routines, each of which includes the same lower-level one,
+two or more copies of the low-level routine would be included.  Then
+before you know it, you're committing Microsoft-level stupidities like
+having seventy-odd copies of the <TT>getchar()</TT> code in
+<A NAME="jump1">MS-Word</A><SUP><A HREF="#note1">1</A></SUP>.
+<P>
+It's better, though admittedly clumsy, to require the top-level
+program to include all the prerequisite functions of the functions it
+uses.  At least the assembler helps with this, by complaining when a
+used label is not defined.
+
+<H4><A NAME="5.2.3">5.2.3.  Comments</A></H4>
+Each standard library file must begin with a comment line stating the
+name of the file, followed a space, two hyphens, a space, and a
+one-line description of the file.  Examples:
+<P>
+<BLOCKQUOTE><PRE>
+# multiply.eas -- multiply two numbers
+# readnum.eas -- read a decimal number
+# writenum.eas -- write a decimal integer
+</PRE></BLOCKQUOTE>
+<P>
+The next line should be a comment containing version-control
+information, if appropriate.  Examples:
+<P>
+<BLOCKQUOTE><PRE>
+# SCCSID("@(#)/home/mike/eta/easpit/SCCS/s.writestr.eas	1.1")
+# SCCSID("@(#)/home/mike/eta/easpit/SCCS/s.writenum.eas	1.2")
+</PRE></BLOCKQUOTE>
+<P>
+If the file requires any other files to be included in order to
+provide lower-level routines which it uses, these should be listed,
+separated by commas, on a subsequent comment line beginning <TT>#
+Requires:</TT>.  Examples:
+<P>
+<BLOCKQUOTE><PRE>
+# Requires: WRITESTR
+# Requires: READNUM, MULTIPLY
+</PRE></BLOCKQUOTE>
+<P>
+(These requirements may seem unnecessarily draconian, but they do
+facilitate automatic processing of the library files to produce tables
+like the one below.)
+
+
+<H3><A NAME="5.3">5.3.  Routines</A></H3>
+<P>
+Here, then, are the routines currently provided in the standard
+library:
+<P>
+<TABLE BORDER="1" CELLPADDING="3">
+<TR>
+	<TH ALIGN="left">Label
+	<TH ALIGN="left">Requires
+	<TH ALIGN="left">Description
+</TR>
+<TR>
+	<TD><TT>MULTIPLY</TT>
+	<TD><I>nothing</I>
+	<TD>
+	Multiplies together the top two numbers on the stack, leaving
+	the product on top of the stack in their place.  The
+	multiplication takes time proportional to the argument on top
+	of the stack (i.e. the second argument to be pushed), so (for
+	example)
+	<TT>N50 N5 N1 N&lt;MULTIPLY T</TT> is about ten times faster than
+	<TT>N5 N50 N1 N&lt;MULTIPLY T</TT>.
+</TR>
+<TR>
+	<TD><TT>WRITESTR</TT>
+	<TD><I>nothing</I>
+	<TD>
+	Writes to the standard output stream the characters that have
+	been pushed onto the stack, up to but not including a
+	terminating NUL character (zero), and consuming all the
+	characters including the NUL.  No implicit newline character
+	is written: this must be done explicitly (<TT>N10 O</TT>) if
+	required.
+	<P>
+	Note that the characters must be stacked in reverse order from
+	how they are to be displayed, as in <TT>N0 N'o N'l N'l N'e N'H
+	N1 N&lt;WRITESTR T</TT>.
+</TR>
+<TR>
+	<TD><TT>WRITENUM</TT>
+	<TD><TT>WRITESTR</TT>
+	<TD>
+	Writes to the standard output stream the decimal
+	representation of the number on top of the stack, consuming it
+	in the process.  No implicit newline character is written:
+	this must be done explicitly (<TT>N10 O</TT>) if required.
+</TR>
+<TR>
+	<TD><TT>READNUM</TT>
+	<TD><TT>MULTIPLY</TT>
+	<TD>
+	Reads a decimal integer from the standard input stream and
+	leaves it on the stack.  An optional leading sequence of space
+	characters is consumed, followed by a sequence of digits and a
+	terminating space or newline character.
+</TR>
+</TABLE>
+<P>
+(Source code for some of these routines is provided below in the
+Tutorial Examples section.)
+
+
+
+<H2><A NAME="6">6.  Development/Debugging Hints</A></H2>
+<P>
+It's worth using the <TT>-d 4</TT> option of the Reference ETA
+interpreter to get a debugging trace: before each instruction is run,
+this shows the current line-number, the contents of the stack, and the
+instruction itself.
+<P>
+It turns out to be very useful to formalise an invariant that is
+always true at the top of a loop.  I always used to look down on this
+sort of computer-science-for-the-sake-of-it behaviour, with Bound
+Functions and Weakest Preconditions and all that, but I can see where
+it comes from now I'm programming a really primitive machine!
+<P>
+Another useful technique is to comment each line of your EAS program
+with a picture of how the stack's expected to look after it executes.
+This gives you something to compare the debugging output with.
+
+
+
+<H2><A NAME="7">7.  Future Directions</A></H2>
+<P>
+Possible enhancements for the future include:
+<P>
+<UL>
+<LI>Syntax to indicate a relative transfer (using the <TT>Address</TT>
+	instruction.)
+<LI>Facilities for defining and using macros.
+<LI>A library of pre-defined macros (pseudo-instructions).
+</UL>
+
+
+
+<H2><A NAME="8">8.  Tutorial Examples</A></H2>
+
+
+<H3><A NAME="8.1">8.1.  Introduction</A></H3>
+<P>
+This section presents a sequence of twelve increasingly complex EAS
+code fragments - some entire programs, some functions - which together
+constitute a small but complete tutorial in the use of EAS to write
+Real World ETA programs.  The later examples build on the earlier, to
+yield programs of some complexity.
+
+
+<H3><A NAME="8.2">8.2.  true</A></H3>
+<P>
+This is a re-implementation of the Unix utility <TT>/bin/true</TT>,
+the purpose of which is to return a ``success'' exit-status to the
+operating system.  No instructions at all are needed, since falling
+off the end of an ETA program is equivalent to an explicit Transfer to
+address zero, causing the interpreter to return ``success'' to the
+operating system.  So here is the program in its entirety:
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# true.eas -- /bin/true reimplemented in ETA Assembler.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.true.eas	1.1")
+</PRE></SMALL></BLOCKQUOTE>
+
+
+
+<H3><A NAME="8.3">8.3.  Hello, World!</A></H3>
+<P>
+This program prints everyone's favourite message.  The interleaving of
+the <B>N</B>umber and <B>O</B>utput instructions is obviously pretty
+arbitrary.  I've chosen to avoid the fenceposts: the selected
+interleaving is neither
+<I>n</I> &times; (<B>N</B>umber; <B>O</B>utput) 
+nor
+<I>n</I> &times; <B>N</B>umber; <I>n</I> &times; <B>O</B>utput.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# hello.eas -- the "Hello, world!" program in ETA Assembler.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.hello.eas	1.1")
+
+Number 32	# can't quote a space character: use ASCII value
+Number ',  Number 'o  Number 'l  Number 'l  Number 'e  Number 'H
+Output Output Output Output Output Output Output
+Number 10	# can't quote a newline either
+Number '!  Number 'd  Number 'l  Number 'r  Number 'o  Number 'w
+Output Output Output Output Output Output Output
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+An alternative approach would be push a marker character on to the
+stack - NUL would be an obvious choice - followed by all the
+characters of the message, then call a well-known function to output
+the stacked characters: see below for this program.
+
+
+<H3><A NAME="8.4">8.4.  Copying Input to Output</A></H3>
+<P>
+This program demonstrates the use of the <B>T</B>ransfer instruction
+for conditionals (line 4), discarding unwanted values from the stack
+(line 5), termination (line 6) and looping (line 7).
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# pip.eas -- CP/M's "pip" program, copies input to output.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.pip.eas	1.1")
+
+&gt;LOOP: Input				# Read a character
+Number 0  Halibut			# Duplicate it for the test
+Number 0  Number 1  Subtract Subtract	# Compare with -1 (EOF)
+Number &lt;WRITE  Transfer			# If not equal, continue ...
+N 0 N 1 H T				# ... otherwise discard -1
+Number 1  Number 0  Transfer		# ... and make a successful exit
+&gt;WRITE: Output				# Copy the character
+Number 1  Number &lt;LOOP  Transfer	# Go back and read the next one
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+(Not all the features of the original CP/M <TT>pip</TT> are
+implemented!)
+
+
+<H3><A NAME="8.5">8.5.  Function Definition</A></H3>
+<P>
+Although this code performs perfectly good addition, its main purpose
+is to demonstrate function definition.  (After all, addition is pretty
+easy in EAS: just subtract the negation of the number you want to add.
+Make the negation by subtracting the number from zero.)
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# function.eas -- define a function to add two numbers together.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.function.eas	1.1")
+
+# On entry, stack = ... x y addr
+# Prologue: roll args above return address
+&gt;ADD: Number 2 Halibut		# ... y addr x
+Number 2  Halibut		# ... addr x y
+
+# Add the numbers: subtract y from zero, then the result from a.
+Number 0			# ... addr x y 0
+Number 1  Halibut		# ... addr x 0 y
+Subtract			# ... addr x -y
+Subtract			# ... addr x+y
+
+# Epilogue: tidy up stack to leave result on top, then return
+Number 1			# ... addr x+y TRUE
+Number 2  Halibut		# ... x+y TRUE addr
+Transfer			# Return to addr, leaving acc on stack
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+The prologue <TT>N2 H N2 H</TT> can be considered as a standard
+idiom for entry to a two-argument function; equivalent sequences for
+functions of zero, one, three or more arguments are obvious.
+<P>
+Similarly, the epilogue <TT>N1 N2 H T</TT> can be considered as a
+standard idiom for exit from a function of a single return-value.
+
+
+<H3><A NAME="8.6">8.6.  Function Call</A></H3>
+<P>
+Here, we demonstrate how to call the addition function defined in the
+previous example.  Note that the arguments are pushed on the stack
+<I>before</I> the call address, so the calling sequence itself
+(<TT>N1 N&lt;ADD T</TT>) can be considered as atomic.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# add.eas -- test-harness for addition function.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.add.eas	1.1")
+
+Input				# stack: x
+Input				# stack: x y
+Address N 1  N &lt;ADD  Transfer
+Output				# print result
+Number 1  Number 0  Transfer 0	# jump to location zero, i.e. stop
+
+# include the addition function
+*function.eas
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+(This program is not actually particularly useful as it stands, since
+the numbers to be added are read as the ASCII values of consecutive
+input characters, and the sum is written as the character with the
+appropriate ASCII value.)
+
+
+<H3><A NAME="8.7">8.7.  Writing a String (Variadic Function)</A></H3>
+<P>
+This is an unusual function, in that it is variadic.  This means
+that we can't use a standard prologue to roll the return address
+down under the arguments.  Instead we maintain the invariant that the
+top of the stack is the return address, and the characters remaining
+to be written are immediately below it.
+<P>
+This invariant is true on entry, so there is no prologue as such.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# writestr.eas -- write a NUL-terminated string
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.writestr.eas	1.1")
+
+&gt;WRITESTR: N1 Halibut			# move next character above addr
+N0 Halibut				# duplicate it for the test below
+Address N0 N1 S S T			# skip if non-zero
+
+# We only get here if we've seen the NUL, and by that point, the stack
+# is: ... &lt;addr&gt; NUL.  We need to strip the trailing NUL and return.
+# This epilogue is in the middle of the function (why not?)
+Subtract N1 N1 Halibut Transfer
+
+# The character is on top of the stack output and loop.
+# (Or think of it as tail-recursion if you're a Lisp hacker :-)
+Output
+N1 N&lt;WRITESTR Transfer
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+The epilogue is still called an epilogue, even though it's in the
+middle of the code.
+
+
+<H3><A NAME="8.8">8.8.  A Better Implementation of Hello, World!</A></H3>
+<P>
+This re-implementation of the ``Hello, World!'' program uses the
+<TT>WRITESTR</TT> function defined in the previous example.  It merely
+stacks up the characters of its message, then calls WRITESTR to write
+them out.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# hello2.eas -- A better "Hello, world!" program, using an output function.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.hello2.eas	1.1")
+
+N0 N10 N'! N'd N'l N'r N'o N'w N32 N', N'o N'l N'l N'e N'H
+Address N1 N&lt;WRITESTR Transfer
+N1 N0 T
+
+# include the string-output function
+*writestr.eas
+</PRE></SMALL></BLOCKQUOTE>
+
+
+
+<H3><A NAME="8.9">8.9.  Writing a Number (yes, I know it's pathetic)</A></H3>
+<P>
+In addition to being a very useful routine for real programs, this
+demonstrates some fairly sophisticated stack management (with
+extensive use of the <B>H</B>alibut instruction), and consequently,
+the technique of using a semi-formal loop invariant and stack
+pictures as an aid to development and debugging.  This routine also
+introduces the divid<B>E</B> instruction.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# writenum.eas -- write a decimal integer
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.writenum.eas	1.2")
+#
+# Requires: WRITESTR
+
+# Prologue (called with arg).
+# Start state				# ... arg addr
+&gt;WRITENUM: N0 N2 Halibut		# ... addr NUL arg
+
+N0 H A N0 N1 S S T			# skip to real start if non-zero
+N'0 O T N1 N1 Halibut Transfer		# special case for arg=0
+
+# Invariant: stack contains a NUL, then the ASCII codes of the digits
+# rendered so far (least significant first), then the remaining part
+# of the number being rendered.
+&gt;WRITENUMloop: N0 Halibut		# ... addr NUL &lt;digits&gt; arg arg
+Address N0 N1 S S Transfer		# if not done, skip a line
+S N1 N&lt;WRITENUMdone Transfer		# done: strip NUL, jump to output phase
+N10 dividE				# find next digit
+N0 N'0 Subtract Subtract		# calculate its ASCII code
+# Stack now contains \0 &lt;digits&gt; quotient ASCII(remainder)
+# We just need to swap the last two to attain the invariant above.
+N1 Halibut				# swap
+N1 N&lt;WRITENUMloop Transfer		# next iteration
+
+# Call existing code to output the accumulated digits.
+&gt;WRITENUMdone: A N1 N&lt;WRITESTR Transfer
+# Epilogue: return to the stacked address
+N1 N1 Halibut Transfer
+</PRE></SMALL></BLOCKQUOTE>
+
+
+
+<H3><A NAME="8.10">8.10.  Multiplication</A></H3>
+<P>
+Here we multiply two numbers, <I>x</I> and <I>y</I> by starting with a
+zero-valued accumulator and adding <I>x</I> to it <I>y</I> times.
+This routine, or an equivalent, is all but indispensable when writing
+real programs of any substance.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# multiply.eas -- multiply two numbers
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.multiply.eas	1.1")
+#
+# Caveat callor: since this loops on the second argument to be pushed,
+# it should be minimised where possible: it's (roughly) a hundred
+# times faster to multiply 200*2 than 2*200.
+
+# Prologue for a function of two arguments
+# Initial state:		# ... x y addr
+&gt;MULTIPLY: N2 H N2 H		# ... addr x y
+
+# Create an accumulator (initially zero), push it below the working numbers.
+N0				# ... addr x y acc
+N2 Halibut			# ... addr y acc x
+N2 Halibut			# ... addr acc x y
+
+# Loop invariant: stack is of the form: ... addr acc x y'
+# Where y' is gradually decremented, and acc increases by x each time.
+&gt;MULTIPLYloop: N0 Halibut	# dup
+A N0 N1 S S T			# if not done, skip a line
+N1 N&lt;MULTIPLYdone Transfer	# done: jump to end
+N1 Subtract			# ... addr acc x y  (but y--)
+N2 Halibut			# ... addr x y acc
+N0 N0 N3 Subtract Halibut	# ... addr x y acc 0 x
+Subtract Subtract		# ... addr x y acc  (but acc+=x)
+N2 Halibut			# ... addr y acc x
+N2 Halibut			# ... addr acc x y
+N1 N&lt;MULTIPLYloop Transfer	# next
+
+# Stack is: ... addr acc x y(=0); we have to discard two values
+&gt;MULTIPLYdone: N1 H T		# ... addr acc
+
+# Standard function-call epilogue.
+N1 N2 H T
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+Note the use of the idiom
+<P>
+<BLOCKQUOTE><PRE>
+A N0 N1 S S T
+</PRE></BLOCKQUOTE>
+<P>
+to skip a single line if the number on top of the stack is true.  This
+is a classic case of a non-trivial sequence of operations being
+treated as an indivisible unit.
+<P>
+(This routine is an execution bottleneck for many EAS programs, since
+it runs in O(<I>arg2</I>) time.  A faster multiplication routine would
+be a great boon: but is one even theoretically possible?)
+
+
+<H3><A NAME="8.11">8.11.  Reading a Number</A></H3>
+<P>
+This is written as a function of no arguments, returning a single
+value.
+<P>
+The numeric input convention that we use is that any leading spaces
+are skipped, then a sequence of non-spaces (assumed but not checked
+to be decimal digits) is accumulated numerically, then a terminating
+space is consumed.  Pragmatic considerations dictate that a trailing
+newline or EOF must be treated as an alternative terminator.
+<P>
+This is not perfect: we'd like to treat all whitespace equivalently
+(but that would be dull); we'd like to check that the digits are
+between 0 and 9 (but we have no inequality check); we'd like not to
+consume the trailing space (but we don't have a <TT>PEEK</TT> or
+<TT>UNGET</TT>) facility.  Nevertheless, this is an invaluable
+routine.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# readnum.eas -- read a decimal number
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.readnum.eas	1.1")
+#
+# Requires: MULTIPLY
+
+# No input args =&gt; no function prologue
+
+# Skip leading spaces
+&gt;READNUM: &gt;READNUMspace: Input
+N0 Halibut N32 Subtract			# duplicate input, compare to SPACE
+A N0 N1 S S Transfer			# Skip if non-zero (i.e. != ' ')
+N0 N1 T N&lt;READNUMspace T		# discard NUL and loop
+
+# Initialise accumulator and push it below initial digit
+N0 N1 Halibut
+
+# Accumulate digits: we already have the first
+&gt;READNUMloop: N'0' Subtract		# convert char to number
+N1 Halibut				# stack: num acc
+N10 A N1 N&lt;MULTIPLY Transfer		# multiply by 10
+N0 N1 Halibut				# stack: num 0 10*acc
+Subtract Subtract			# add accumular back onto new digit
+Input
+N0 H N32 S N&lt;READNUMnl T		# if not a space, continue
+N1 N&lt;READNUMdone T			# it _was_ a space: out of here
+&gt;READNUMnl: N0 H N10 S N&lt;READNUMeof T	# if not a newline, continue
+N1 N&lt;READNUMdone T			# it _was_ a newline: out of here
+&gt;READNUMeof: N0 H N0 N1 S S N&lt;READNUMloop T	# if not a EOF, loop
+
+# Otherwise, we're finished: discard spare space character
+&gt;READNUMdone: N0 N1 H T
+
+# epilogue
+N1 N2 H T
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+Note that the <TT>MULTIPLY</TT> routine, defined in a previous
+example, is used here: so any program that includes this file must
+also include <TT>multiply.eas</TT>
+
+
+<H3><A NAME="8.12">8.12.  Factorial (Recursive)</A></H3>
+<P>
+We make extensive use of function-calls here: first, to obtain the
+number whose factorial we wish to calculate; second, to perform that
+calculation - recursively as it happens; and third, to write the
+result in a human-readable form.
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# fact.eas -- factorial, via recursion
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.fact.eas	1.1")
+
+# Caller
+A N1 N&lt;READNUM T	# obtain argument
+A N1 N&lt;FACT T		# call factorial function
+A N1 N&lt;WRITENUM T	# print result
+N10 O N1 N0 T		# print a newline and exit
+
+# One input arg: function prologue
+&gt;FACT: N1 H		# roll argument above return address	# ... addr arg
+
+# Function body
+# Factorial of 1 is just 1
+N0 H			# duplicate top for test		# ... addr arg arg
+N1 S A N0 N1 S S T	# skip if non-zero (ie. top wasn't 1)	# ... addr arg arg-1 here+1 T
+N1 N&lt;FACTdone T		# argument _was_ 1: we're finished	# ... addr arg
+N0 H			# dup					# ... addr arg arg
+N1 S			# stack is now: ... addr n n-1		# ... addr arg arg-1
+A N1 N&lt;FACT T		# recursive call (tail recursion!)	# ... addr arg fact(arg-1)
+A N1 N&lt;MULTIPLY T	# multiply Nby fact(n-1)		# ... addr arg*fact(arg-1)
+# result is on the stack: fall through to the epilogue
+
+# Finished: function epilogue
+&gt;FACTdone: N1 N2 H T
+
+*readnum.eas
+*writenum.eas
+*multiply.eas
+*writestr.eas
+</PRE></SMALL></BLOCKQUOTE>
+
+
+
+<H3><A NAME="8.13">8.13.  99 Bottles of Beer on the Wall</A></H3>
+<P>
+This program, again making use of pre-defined routines, prints the
+words to the classic song <I>99 Bottles of Beer on the Wall</I>:
+<P>
+<BLOCKQUOTE><SMALL><PRE>
+# bottles.eas - sing "99 bottles of beer on the wall"
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/easpit/SCCS/s.bottles.eas	1.2")
+
+# Entry point: jump past included and defined routines
+N1 N&lt;MAIN T
+
+# Standard library routines
+*writestr.eas
+*writenum.eas
+
+# Subroutine: write "&lt;n&gt; bottles of beer"
+# Sole argument: number of bottles.
+&gt;nBoB: N1 H # prologue
+A N1 N&lt;WRITENUM T
+N0 N'r N'e N'e N'b N32 N'f N'o N32 N's N'e N'l N't N't N'o N'b N32
+A N1 N&lt;WRITESTR T
+N1 N1 H T
+
+# Subroutine: write "&lt;n&gt; bottles of beer on the wall"
+# Sole argument: number of bottles.
+&gt;nBoBotW: N1 H # prologue
+A N1 N&lt;nBoB T
+N0 N'l N'l N'a N'w N32 N'e N'h N't N32 N'n N'o N32
+A N1 N&lt;WRITESTR T
+N1 N1 H T
+
+&gt;MAIN: N99
+# Stack invariant is trivial: top is number of bottles left.
+&gt;LOOP: N0 H A N1 N&lt;nBoBotW T
+N', O N32 O
+N0 H A N1 N&lt;nBoB T
+N10 O
+N0 N10 N'd N'n N'u N'o N'r N'a N32 N't N'i N32 N's N's N'a N'p N32 N', N'n N'w N'o N'd N32 N'e N'n N'o N32 N'e N'k N'a N'T
+A N1 N&lt;WRITESTR T
+N1 S
+N0 H A N1 N&lt;nBoBotW T
+N10 N10 O O
+N0 H N&lt;LOOP T
+# Done: tidy up by dropping the spare 0 from the stack
+N0 T
+</PRE></SMALL></BLOCKQUOTE>
+
+<P>
+Note that the function <TT>BoBotW</TT>, which prints the message
+<TT><I>number</I> bottles of beer on the wall</TT>, works by calling
+<TT>BoB</TT> to print the first part of the message, and appending the
+latter part.
+<!--
+
+
+<H3>Greatest Common Factor (Euclid's Algorithm)
+</H3>
+<P>
+### Not yet done.
+-->
+
+
+
+<H2><A NAME="9">9.  Appendix: Additional ETA-Programming Tools</A></H2>
+
+
+<H3><A NAME="9.1">9.1.  EASy</A></H3>
+<P>
+There is a wrapper, EASy, that assembles an EAS program and executes
+the resulting ETA code.  As a side-effect, it leaves the ETA program
+in a file in the same directory as the EAS program, and whose name is
+formed from its name by removing the <B>.eas</B> extension (if any)
+and adding a <B>.eta</B> extension.
+
+
+<H3><A NAME="9.2">9.2.  ETAword</A></H3>
+<P>
+This is a trivial hack to find words from the system dictionary that
+can be incorporated into an ETA program containing a known sequence
+of significant characters.  The command-line arguments are sequences
+of consecutive instructions to be incorporated into single words.
+<P>
+For example:
+<P>
+<BLOCKQUOTE>
+<TT>etaword nen</TT> &rarr; drunken, gunmen<BR>
+<TT>etaword tes</TT> &rarr; cutesy, Rutgers, uterus<BR>
+<TT>etaword nt</TT> &rarr; blunt, burnt, grunt<BR>
+</BLOCKQUOTE>
+
+
+<H3><A NAME="9.3">9.3.  ETAinst</A></H3>
+<P>
+This is a truly trivial hack to find the significant characters in
+candidate words for an ETA program.  This will tell you (for example)
+what your name does, so that you can interpolate it in an ETA program.
+<P>
+For example:
+<P>
+<BLOCKQUOTE>
+<TT>etainst Mike Taylor</TT> &rarr; ie, Tao<BR>
+<TT>etainst Programming</TT> &rarr; oain<BR>
+<TT>etainst Language</TT> &rarr; anae<BR>
+</BLOCKQUOTE>
+
+
+<H3><A NAME="9.4">9.4.  [Your Utility Here]</A></H3>
+<P>
+There are plenty of other ETA-programming utilities yet to be
+written.
+<P>
+An obvious one would be the program that takes an unpadded ETA program
+(such as the output of EAS) and writes an equivalent program
+consisting entirely of words found in the system dictionary.  A simple
+version of this program could be written just by making repeated calls
+to <TT>etaword</TT>; although a cleverer version would know something
+about grammar, and perhaps even about style and taste.
+<P>
+There are other possibilities, including (for example): a program to
+generate no-op sequences of ETA instructions for harmless inclusion in
+programs; a program to re-locate ETA code to start at a different
+line; and of course, a disassembler.
+<P>
+Creators of new ETA-programming utilities are encouraged to email them
+to the author (address above) for attributed inclusion in future
+releases of the ETA distribution.
+
+
+<P>
+&nbsp;
+<P>
+&nbsp;
+<P>
+&nbsp;
+<P>
+&nbsp;
+<HR>
+<B><A NAME="note1">Note 1</A></B>
+<BR>
+Disclaimer: in no way does the author think that Microsoft products
+are of a uniformly low quality in terms both of design and
+implementation.  Nothing could be further from the truth that to
+assume that he spends large portions of the typical working day in a
+raging fury at arbitrary stupidities in Microsoft applications, nor
+that he routinely experiences several crashes per day.  In fact, the
+author is extremely fond of the Microsoft corporation, and especially
+likes its lawyers.
+<A HREF="#jump1">[Back]</A>
+
+&nbsp;
+<P>
+&nbsp;
+<P>
+&nbsp;
+<P>
+<SMALL>
+Source filename: eas.html<BR>
+Last update: Tue Sep 28 15:04:06 1999
+</SMALL>
+</BODY>
+</HTML>

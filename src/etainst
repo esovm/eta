@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+
+# etainst -- find ETA instructions in arguments.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/src/SCCS/s.etainst	1.1")
+#
+# This is a truly trivial hack to find the significant characters in
+# candidate words for an ETA program.  This will tell you (for
+# example) what your name does, so that you can interpolate it in an
+# ETA program.
+#
+# For example:
+#	etainst Mike Taylor	=> ie, Tao
+#	etainst Programming	=> oain
+#	etainst Language	=> anae
+
+use strict;
+
+foreach my $word (@ARGV) {
+    my $i = $word;
+    $i =~ s/[^etaoinshETAOINSH]//g;
+    print "'$word' => $i\n";
+}

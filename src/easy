@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# EASy -- Easy interface to EAS and ETA.
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/src/SCCS/s.easy	1.1")
+#
+# Yes, this is trivial.  That's deliberate.
+# EAS is the assembler, and ETA interprets the output.
+# This is only a wrapper.
+
+etaflags=
+if [ x"$1" = x-d ]; then
+	etaflags="-d $2"
+	shift 2
+fi
+
+if [ $# -eq 0 ]; then
+	echo "Usage: $0 [-d <debug>] <EAS-file> ..." >&2
+	exit 1
+fi
+
+out=`echo $1 | sed 's/\.eas$//'`.eta
+if [ "x`find $1 -newer $out -print 2> /dev/null`" != "" ]; then
+	# Don't create output file if there's a problem
+	cat "$@" > /dev/null &&
+		cat "$@" | eas > $out
+fi
+
+exec eta $etaflags $out

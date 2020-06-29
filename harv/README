@@ -1,0 +1,9 @@
+This directory contains material written by:
+
+	Harvey Thompson
+	<harveyt@sco.COM>
+	http://www.ocston.org/~harveyt
+
+"eta.c.orig" is as supplied by Harv; it contains a bug caused by his
+misunderstanding the section on ASCII in the ETA manual.  I have
+trivially fixed this in "eta.c".

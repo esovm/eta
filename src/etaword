@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+
+# etaword -- find words to incorporate in ETA programs
+# SCCSID("@(#)/export/home/staff/mike/src/language/eta/src/SCCS/s.etaword	1.1")
+#
+# This is a trivial hack to find words from the system dictionary that
+# can be incorporated into an ETA program containing a known sequence
+# of significant characters.  The command-line arguments are sequences
+# of consecutive instructions to be incorporated into single words.
+#
+# For example:
+#	etaword nen		=> drunken, gunmen
+#	etaword tes		=> cutesy, Rutgers, uterus
+#	etaword nt		=> blunt, burnt, grunt
+
+use strict;
+
+foreach my $arg (@ARGV) {
+    my @ops = split /%*/, $arg;
+    my $x = qq([^etaoinsh]*);
+    my $pattern = "^$x" . join($x, @ops) . "$x\$";
+    $| = 1;
+    print "--- $arg ---\n";
+    system "grep", "-i", $pattern, "/usr/dict/words";
+}

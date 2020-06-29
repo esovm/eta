@@ -1,0 +1,13 @@
+This directory contains the specification for, and an implementation
+of, the ETA language, together with EAS, the Eta ASsembler.
+
+All this stuff is distributed under the following terms:
+
+Copyright (C) Mike Taylor, 1999.
+
+This material may be freely redistributed provided it is not modified
+in any way.  Specifically, the authorship must remain clear.  Users
+may modify their own copies, but may not distribute the results
+without first obtaining permission from the author.  All feedback is
+extremely welcome, and should be emailed to the author at
+<mike@tecc.co.uk>
